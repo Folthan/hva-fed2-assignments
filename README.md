@@ -10,4 +10,4 @@ Best Practises
 - Use === in stead of ==
 - Use parameter defaults
 - Always use var
-- Use Correct <script> Tags
+- Use Correct &lt;script&gt; Tags
