@@ -10,3 +10,4 @@ Best Practises
 - Use === in stead of ==
 - Use parameter defaults
 - Always use var
+- Load JS after the content, not before
