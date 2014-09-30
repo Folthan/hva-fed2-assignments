@@ -14,7 +14,8 @@ MOVIEWEB = MOVIEWEB || {};
 
 	MOVIEWEB.config = {
 		JsonBaseURL: "http://api.themoviedb.org/3/", //My api
-		JsonApiKey: "?api_key=VUL-HIER-JE-API-ID-IN" //My personal API key 
+		JsonApiKey: "?api_key=9bc143343c69c1a55c7c76cb204e9e1d", //My personal API key 
+		imgBaseURL: "http://image.tmdb.org/t/p/w500/" //The base URL for images
 
 	};
 
@@ -28,16 +29,11 @@ MOVIEWEB = MOVIEWEB || {};
 				},
 
 				'/genre/:id': function (id) {
-					MOVIEWEB.templates.default("home");
-					MOVIEWEB.getContent.homeHtml(id);
 					MOVIEWEB.getContent.genreHtml(id);
 				},
 
-				'/movies': function () {
-					MOVIEWEB.templates.default("movies");
-				},
-				'/movies/:name': function (name) {
-					MOVIEWEB.templates.movie(name);
+				'/movie/:id': function (id) {
+					MOVIEWEB.getContent.movieHtml(id);
 				},
 
 				'/about': function () {
@@ -113,11 +109,7 @@ MOVIEWEB = MOVIEWEB || {};
 					//for each genre, add a <li> element
 					for(key in data) {
 						if (data.hasOwnProperty(key)) {
-							if(id == data[key].id) {
-								htmlBuffer += ('<li class="active" id="'+data[key].id+'"><a href="#/genre/'+data[key].id+'">' + data[key].name + '</li>');
-							} else {
-								htmlBuffer += ('<li id="'+data[key].id+'"><a href="#/genre/'+data[key].id+'">' + data[key].name + '</li>');
-							}
+							htmlBuffer += ('<li><a href="#/genre/'+data[key].id+'">' + data[key].name + '</li>');
 						}
 					}
 					
@@ -141,16 +133,11 @@ MOVIEWEB = MOVIEWEB || {};
 					var htmlBuffer = "";
 					var key;
 					data = data.results;
-					console.log(data);
 
 					//for each movie, add a <li> element
 					for(key in data) {
 						if (data.hasOwnProperty(key)) {
-							if(id == data[key].id) {
-								htmlBuffer += ('<li class="active" id="'+data[key].id+'"><a href="#/movie/'+data[key].id+'">' + data[key].title + '</li>');
-							} else {
-								htmlBuffer += ('<li id="'+data[key].id+'"><a href="#/movie/'+data[key].id+'">' + data[key].title + '</li>');
-							}
+							htmlBuffer += ('<li><a href="#/movie/'+data[key].id+'">' + data[key].title + '</li>');
 						}
 					}
 					
@@ -163,15 +150,51 @@ MOVIEWEB = MOVIEWEB || {};
 			);
 		},
 
+		movieHtml: function(id) {
+			//this is the function that generates the HTML for a list of movies.
+			var url = "movie/"+id;
+ 			var fullUrl = MOVIEWEB.config.JsonBaseURL+url+MOVIEWEB.config.JsonApiKey;
+ 			
+ 			//load the list of movies
+			MOVIEWEB.getContent.json(fullUrl,
+				function(data) {
+					var htmlBuffer = "";
+					var key;
+					var notFirst = false;
+					console.log(data);
+
+					htmlBuffer += '<div id="backdrop"><img src="' + MOVIEWEB.config.imgBaseURL + data.backdrop_path + '"></div>'
+					htmlBuffer += '<img id="poster" src="' + MOVIEWEB.config.imgBaseURL + data.poster_path + '">'
+					htmlBuffer += '<h1>' + data.title + '</h1>';
+					
+					htmlBuffer += '<ul id="genres">';
+
+					for(key in data.genres) {
+						if (data.genres.hasOwnProperty(key)) {
+							if(notFirst){
+								htmlBuffer += ('<li class="bullet"> &#149; </li>');
+							}
+							htmlBuffer += ('<li><a href="#/genre/'+data.genres[key].id+'">' + data.genres[key].name + '</a></li>');
+							notFirst = true
+						}
+					}
+					htmlBuffer += '</ul>';
+
+					htmlBuffer += '<p id="overview">' + data.overview + '</p>';
+
+					document.querySelector("div#movie").innerHTML = htmlBuffer;
+				},
+				function(xhr) {
+					console.error(xhr);
+				}
+			);
+		}
 	};
 
 	MOVIEWEB.dataBase = {
 		pages: {
 			home: {
-				content: "<div id='genres'><ul id='genreList'><li>Loading...</li></ul></div><div id='movies'><ul id='movieList'></ul></div>"
-			},
-			movie: {
-				content: ""
+				content: "<div id='genres'><ul id='genreList'><li>Loading...</li></ul></div><div id='movies'><ul id='movieList'></ul></div><div id='movie'></div>"
 			},
 			notfound: {
 				title: "404 Error",
