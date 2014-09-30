@@ -4,36 +4,19 @@
 		<title>MovieWeb</title>
 		<link rel="stylesheet" href="css/style.css">
 		<link rel="stylesheet" href="css/animate.css">
+		<link rel="stylesheet" href="css/font-awesome.min.css">
 	</head>
 	<body>
 		
 		<div id="wrapper" class="animated fadeIn">
-			<nav>
-				<ul>
-					<li><a href="#/">Home</a></li>
-					<li><a href="#/about">About</a></li>
-					<li><a href="#/movies">Movies</a>
-						<ul>
-							<li><a href="#/movies/shawshankRedemption">Shawshank Redemption</a></li>
-							<li><a href="#/movies/theGodfather">The Godfather</a></li>
-							<li><a href="#/movies/pulpFiction">Pulp Fiction</a></li>
-							<li><a href="#/movies/theDarkKnight">The Dark Knight</a></li>
-						</ul>
-					</li>
-					<li><a href="#/contact">Contact</a></li>
-				</ul>
-			</nav>
 
 			<section id="container">
-				<h1 data-bind="title"></h1>
-				<p data-bind="content"></p>
-			</section>
-
-			<section id="movieContainer">
-				<img data-bind="image" src=""/>
-				<h1 data-bind="title"></h1>
-				<p data-bind="date"></p>
-				<p data-bind="content"></p>
+				<header>
+					<div id="logo"></div>
+				</header>
+				<div id="contentContainer">
+					<div data-bind="content"></div>
+				</div>
 			</section>
 
 		</div>
