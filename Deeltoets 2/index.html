@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>MovieWeb</title>
+		<link rel="stylesheet" href="css/style.css">
+		<link rel="stylesheet" href="css/animate.css">
+	</head>
+	<body>
+		
+		<div id="wrapper" class="animated fadeIn">
+			<nav>
+				<ul>
+					<li><a href="#/">Home</a></li>
+					<li><a href="#/about">About</a></li>
+					<li><a href="#/movies">Movies</a>
+						<ul>
+							<li><a href="#/movies/shawshankRedemption">Shawshank Redemption</a></li>
+							<li><a href="#/movies/theGodfather">The Godfather</a></li>
+							<li><a href="#/movies/pulpFiction">Pulp Fiction</a></li>
+							<li><a href="#/movies/theDarkKnight">The Dark Knight</a></li>
+						</ul>
+					</li>
+					<li><a href="#/contact">Contact</a></li>
+				</ul>
+			</nav>
+
+			<section id="container">
+				<h1 data-bind="title"></h1>
+				<p data-bind="content"></p>
+			</section>
+
+			<section id="movieContainer">
+				<img data-bind="image" src=""/>
+				<h1 data-bind="title"></h1>
+				<p data-bind="date"></p>
+				<p data-bind="content"></p>
+			</section>
+
+		</div>
+
+		<script src="js/lib/routie.js"></script>
+		<script src="js/lib/transparency.js"></script>
+		<script src="js/controller.js"></script>
+	</body>
+</html>
