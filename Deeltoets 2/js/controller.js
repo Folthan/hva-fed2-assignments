@@ -14,7 +14,7 @@ MOVIEWEB = MOVIEWEB || {};
 
 	MOVIEWEB.config = {
 		JsonBaseURL: "http://api.themoviedb.org/3/", //My api
-		JsonApiKey: "?api_key=9bc143343c69c1a55c7c76cb204e9e1d" //My personal API key 
+		JsonApiKey: "?api_key=VUL-HIER-JE-API-KEY-IN" //My personal API key 
 
 	};
 
