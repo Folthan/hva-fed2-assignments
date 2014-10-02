@@ -1,4 +1,4 @@
-/*global routie, Transparency, data */
+/*global routie, Transparency, data, _ */
 
 /* controller.js */
 var MOVIEWEB;
@@ -6,76 +6,291 @@ MOVIEWEB = MOVIEWEB || {};
 
 (function () {
 
-	MOVIEWEB.controller = {
-		init: function () {
-			MOVIEWEB.router.init();   
-		}
-	};
-
 	MOVIEWEB.config = {
 		JsonBaseURL: "http://api.themoviedb.org/3/", //My api
 		JsonApiKey: "?api_key=9bc143343c69c1a55c7c76cb204e9e1d", //My personal API key 
 		imgBaseURL: "http://image.tmdb.org/t/p/w500/" //The base URL for images
+	};
 
+	MOVIEWEB.controller = {
+		init: function () {
+			MOVIEWEB.router.init();
+		}
 	};
 
 	MOVIEWEB.router = {
 		init: function () {
-
+			
+			
 			routie({
 				'': function () {
-					MOVIEWEB.templates.default("home");
-					MOVIEWEB.getContent.homeHtml();
+					//home
+					console.log("page: Genres");
+					MOVIEWEB.loadSection.genres();
 				},
 
-				'/genre/:id': function (id) {
-					MOVIEWEB.getContent.genreHtml(id);
+				'/movies/:genreID': function (genreID) {
+					//genre gekozen
+					console.log("page: Movies");
+					MOVIEWEB.loadSection.genres();
+					MOVIEWEB.loadSection.movies(genreID);
 				},
-
-				'/movie/:id': function (id) {
-					MOVIEWEB.getContent.movieHtml(id);
-				},
-
-				'/about': function () {
-					MOVIEWEB.templates.default("about");
-				},
-
-				'/contact': function () {
-					MOVIEWEB.templates.default("contact");
-				},
-
-				'*': function () {
-					MOVIEWEB.templates.default("notfound");
+				'/movies/:genreID/:movieID': function (genreID, movieID) {
+					console.log("page: Details");
+					//The genre and the movie have been chosen.
+					MOVIEWEB.loadSection.genres();
+					MOVIEWEB.loadSection.movies(genreID);
+					MOVIEWEB.loadSection.details(movieID);
 				}
+
+				// '/about': function () {
+				// 	//text-pagina: about
+				// },
+
+				// '/contact': function () {
+				// 	//text-pagina: contact
+				// },
+
+				// '*': function () {
+					
+				// }
 			});
 		}
 	};
 
+	MOVIEWEB.loadSection = {
+		genres: function(){
+			if(document.querySelector("#genres ul").innerHTML === "") {
+				console.log("Genres are being loaded...");
+				MOVIEWEB.getJson.genres();
+			}
+		},
+		movies: function(genreID){
+			if(MOVIEWEB.router.currentGenre !== genreID || document.querySelector("#movies ul").innerHTML === "") {
+				console.log("Movies are being loaded...");
+				MOVIEWEB.getJson.movies(genreID);
+				MOVIEWEB.router.currentGenre = genreID;
+			}
+		},
+		details: function(movieID){
+			console.log("Details are being loaded...");
+			MOVIEWEB.getJson.details(movieID);
+			MOVIEWEB.router.currentMovie = movieID;
+		}
+	};
 
-	MOVIEWEB.templates = {
-		default: function (page) {
-			console.log("Current page: " + page);
+	/*
+	* This function returns the data requested
+	* Example:    MOVIEWEB.getJson.genres();
+	*/
 
-			var directives = {
-				content: {
-					html: function () {
-						return this.content;
-					}
+	MOVIEWEB.getJson = {
+		genres: function () {
+			//Grab the list of genres
+			MOVIEWEB.json.init(
+				/* URL */
+				"genre/movie/list",
+
+				/* Extra parameters */
+				"",
+
+				/* Succes function */
+				function(data) {
+					MOVIEWEB.convertAndSave.genres(data);
+					MOVIEWEB.renderHtml.genres();
+				},
+
+				/* Error function*/
+				function(xhr) {
+					console.error(xhr);
 				}
-			};
-			Transparency.render(MOVIEWEB.helpers.containerSelector, MOVIEWEB.dataBase.pages[page], directives);
+			);
+
+		},
+		movies: function (id) {
+			//Grab the list of genres
+			MOVIEWEB.json.init(
+				/* URL */
+				"genre/"+id+"/movies",
+
+				/* Extra parameters */
+				"",
+
+				/* Succes function */
+				function(data) {
+					MOVIEWEB.convertAndSave.movies(data);
+					MOVIEWEB.renderHtml.movies(data);
+				},
+
+				/* Error function*/
+				function(xhr) {
+					console.error(xhr);
+				}
+			);
+
+		},
+		details: function (id) {
+			//Grab the list of genres
+			MOVIEWEB.json.init(
+				/* URL */
+				"movie/"+id,
+
+				/* Extra parameters */
+				"",
+
+				/* Succes function */
+				function(data) {
+					MOVIEWEB.convertAndSave.details(data);
+					MOVIEWEB.renderHtml.details(data);
+				},
+
+				/* Error function*/
+				function(xhr) {
+					console.error(xhr);
+				}
+			);
+
 		}
 	};
 
 
-	MOVIEWEB.helpers = {
-		containerSelector: document.getElementById('container'),
-		movieContainerSelector: document.getElementById('movieContainer')
+	MOVIEWEB.convertAndSave = {
+		genres: function (data) {
+			MOVIEWEB.dataBase.html._genres = "";
+
+			_.each(data.genres, function(i){
+				if(i.id === MOVIEWEB.router.currentMovie) {i.current = true;}
+				MOVIEWEB.dataBase.html._genres += MOVIEWEB._templates.genre({genreID: i.id, genreName: i.name, current: i.current});
+			});
+		},
+		movies: function (data) {
+			MOVIEWEB.dataBase.html._movies = "";
+
+			_.each(data.results, function(i){
+				MOVIEWEB.dataBase.html._movies += MOVIEWEB._templates.movie({genreID: MOVIEWEB.router.currentGenre, movieID: i.id, movieName: i.title});
+			});
+		},
+		details: function (data) {
+			MOVIEWEB.dataBase.html.details = data;
+		}
 	};
 
-	MOVIEWEB.getContent = {
-		json: function(path, success, error) {
+	MOVIEWEB.renderHtml = {
+		genres: function () {
+
+			Transparency.render(
+				/*Element*/
+				document.getElementById('genres'),
+
+				/*Data*/
+				MOVIEWEB.dataBase.html,
+
+				/*Directives*/
+				{
+					_genres: {
+						html: function () {
+							return this._genres;
+						}
+					}
+				}
+			);
+		},
+		movies: function () {
+
+			Transparency.render(
+				/*Element*/
+				document.getElementById('movies'),
+
+				/*Data*/
+				MOVIEWEB.dataBase.html,
+
+				/*Directives*/
+				{
+					_movies: {
+						html: function () {
+							return this._movies;
+						}
+					}
+				}
+			);
+		},
+		details: function () {
+
+			var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+			var date = new Date(Date.parse(MOVIEWEB.dataBase.html.details.release_date));
+			date = months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
+
+			var companies = "<ul>";
+
+			_.each(MOVIEWEB.dataBase.html.details.production_companies, function(i){
+				companies += MOVIEWEB._templates.li({name: i.name});
+			});
+
+			 companies += "<ul>";
+
+			MOVIEWEB.dataBase.html.details = {
+				_title: 	  MOVIEWEB.dataBase.html.details.title, 
+				_tagline: 	  MOVIEWEB.dataBase.html.details.tagline, 
+				_date: 	  	  date,
+				_movieGenres: MOVIEWEB.dataBase.html.details.genres,
+				_backdrop: 	  MOVIEWEB.config.imgBaseURL + MOVIEWEB.dataBase.html.details.backdrop_path,
+				_poster: 	  MOVIEWEB.config.imgBaseURL + MOVIEWEB.dataBase.html.details.poster_path,
+				_overview: 	  MOVIEWEB.dataBase.html.details.overview,
+				_grade: 	  MOVIEWEB.dataBase.html.details.vote_average,
+				_companies:	  companies
+			};
+
+			Transparency.render(
+				/*Element*/
+				document.getElementById('details'),
+
+				/*Data*/
+				MOVIEWEB.dataBase.html.details,
+
+				/*Directives*/
+				{
+					_movies: {
+						html: function () {
+							return this._movies;
+						}
+					},
+					_poster: {
+						src: function () {
+							return this._poster;
+						}
+					},
+					_backdrop: {
+						src: function () {
+							return this._backdrop;
+						}
+					},
+					_companies: {
+						html: function () {
+							return this._companies;
+						}
+					}
+				}
+			);
+		}
+	};
+
+
+	MOVIEWEB._templates = {
+		genre: _.template('<li id="genre-<%- genreID %>"><a href="#/movies/<%- genreID %>/"><%- genreName %></a></li>'),
+		movie: _.template('<li id="movie-<%- movieID %>"><a href="#/movies/<%- genreID %>/<%- movieID %>"><%- movieName %></a></li>'),
+		li:    _.template('<li><%- name %></li>')
+	};
+
+
+
+	MOVIEWEB.json = {
+		init: function(path, params, success, error) {
 			//This is the xhr function, I called it json. Nothing changed here.
+			path = MOVIEWEB.config.JsonBaseURL
+				 + path
+				 + MOVIEWEB.config.JsonApiKey
+				 + params;
+
 			var xhr = new XMLHttpRequest();
 			xhr.onreadystatechange = function() {
 				if (xhr.readyState === 4) {
@@ -92,110 +307,11 @@ MOVIEWEB = MOVIEWEB || {};
 			};
 			xhr.open("GET", path, true);
 			xhr.send();
-		},
-		
-		homeHtml: function(id) {
-			//this is the function that generates the HTML for a list of genres.
-			var url = "genre/movie/list";
- 			var fullUrl = MOVIEWEB.config.JsonBaseURL+url+MOVIEWEB.config.JsonApiKey;
- 			
- 			//load the list of genres
-			MOVIEWEB.getContent.json(fullUrl,
-				function(data) {
-					var htmlBuffer = "";
-					var key;
-					data = data.genres;
-
-					//for each genre, add a <li> element
-					for(key in data) {
-						if (data.hasOwnProperty(key)) {
-							htmlBuffer += ('<li><a href="#/genre/'+data[key].id+'">' + data[key].name + '</li>');
-						}
-					}
-					
-					//add the <li>'s to <ul id="genreList">
-					document.querySelector("ul#genreList").innerHTML = htmlBuffer;
-				},
-				function(xhr) {
-					console.error(xhr);
-				}
-			);
-		},
-
-		genreHtml: function(id) {
-			//this is the function that generates the HTML for a list of movies.
-			var url = "genre/"+id+"/movies";
- 			var fullUrl = MOVIEWEB.config.JsonBaseURL+url+MOVIEWEB.config.JsonApiKey;
- 			
- 			//load the list of movies
-			MOVIEWEB.getContent.json(fullUrl,
-				function(data) {
-					var htmlBuffer = "";
-					var key;
-					data = data.results;
-
-					//for each movie, add a <li> element
-					for(key in data) {
-						if (data.hasOwnProperty(key)) {
-							htmlBuffer += ('<li><a href="#/movie/'+data[key].id+'">' + data[key].title + '</li>');
-						}
-					}
-					
-					//add the <li>'s to <ul id="movieList">
-					document.querySelector("ul#movieList").innerHTML = htmlBuffer;
-				},
-				function(xhr) {
-					console.error(xhr);
-				}
-			);
-		},
-
-		movieHtml: function(id) {
-			//this is the function that generates the HTML for a list of movies.
-			var url = "movie/"+id;
- 			var fullUrl = MOVIEWEB.config.JsonBaseURL+url+MOVIEWEB.config.JsonApiKey;
- 			
- 			//load the list of movies
-			MOVIEWEB.getContent.json(fullUrl,
-				function(data) {
-					var htmlBuffer = "";
-					var key;
-					var notFirst = false;
-					console.log(data);
-
-					htmlBuffer += '<div id="backdrop"><img src="' + MOVIEWEB.config.imgBaseURL + data.backdrop_path + '"></div>'
-					htmlBuffer += '<img id="poster" src="' + MOVIEWEB.config.imgBaseURL + data.poster_path + '">'
-					htmlBuffer += '<h1>' + data.title + '</h1>';
-					
-					htmlBuffer += '<ul id="genres">';
-
-					for(key in data.genres) {
-						if (data.genres.hasOwnProperty(key)) {
-							if(notFirst){
-								htmlBuffer += ('<li class="bullet"> &#149; </li>');
-							}
-							htmlBuffer += ('<li><a href="#/genre/'+data.genres[key].id+'">' + data.genres[key].name + '</a></li>');
-							notFirst = true
-						}
-					}
-					htmlBuffer += '</ul>';
-
-					htmlBuffer += '<p id="overview">' + data.overview + '</p>';
-
-					document.querySelector("div#movie").innerHTML = htmlBuffer;
-				},
-				function(xhr) {
-					console.error(xhr);
-				}
-			);
 		}
 	};
 
 	MOVIEWEB.dataBase = {
-		pages: {
-			home: {
-				content: "<div id='genres'><ul id='genreList'><li>Loading...</li></ul></div><div id='movies'><ul id='movieList'></ul></div><div id='movie'></div>"
-			},
+		html: {
 			notfound: {
 				title: "404 Error",
 				content: "Deze pagina is niet gevonden."
@@ -211,6 +327,6 @@ MOVIEWEB = MOVIEWEB || {};
 		}
 	};
 	
-} () );
+	MOVIEWEB.controller.init();
 
-MOVIEWEB.controller.init();
+} () );

@@ -10,19 +10,55 @@
 		
 		<div id="wrapper" class="animated fadeIn">
 
-			<section id="container">
-				<header>
-					<a href="." id="logo"></a>
-				</header>
-				<div id="contentContainer">
-					<div data-bind="content"></div>
+			<header>
+				<a href="." id="logo"></a>
+			</header>
+
+			<section id="movielist">
+				<div id="genres">
+					<ul data-bind="_genres"></ul>
+				</div>
+
+				<div id="movies">
+					<ul data-bind="_movies"></ul>
+				</div>
+
+				<div id="details">
+
+					<div id="backdrop">
+						<img data-bind="_backdrop" src="">
+					</div>
+					<img data-bind="_poster" id="poster" src="">
+
+					<div id="content">
+						<h1 data-bind="_title"></h1>
+						<h2 data-bind="_tagline"></h2>
+						<ul data-bind="_movieGenres" id="movieGenres"></ul>
+						<p  data-bind="_overview" id="overview"></p>
+						<table id="specifics">
+							<tr>
+								<td>Date: </td>
+								<td data-bind="_date"></td>
+							</tr>
+							<tr>
+								<td>Grade: </td>
+								<td data-bind="_grade"></td>
+							</tr>
+							<tr>
+								<td>By: </td>
+								<td data-bind="_companies"></td>
+							</tr>
+						</table>
+					</div>
+
 				</div>
 			</section>
 
 		</div>
 
-		<script src="js/lib/routie.js"></script>
+		<script src="js/lib/underscore.min.js"></script>
 		<script src="js/lib/transparency.js"></script>
+		<script src="js/lib/routie.js"></script>
 		<script src="js/controller.js"></script>
 	</body>
 </html>
