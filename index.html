@@ -8,10 +8,16 @@
 	</head>
 	<body>
 		
-		<div id="wrapper" class="animated fadeIn">
+		<div id="wrapper">
 
-			<header>
+			<header class="animated fadeInDown">
 				<a href="." id="logo"></a>
+				<nav data-bind="_nav">
+					<ul>
+						<li><a href="#/about">About</a></li>
+						<li><a href="#/contact">Contact</a></li>
+					</ul>
+				</nav>
 			</header>
 
 			<section id="movielist">
@@ -23,7 +29,7 @@
 					<ul data-bind="_movies"></ul>
 				</div>
 
-				<div id="details">
+				<div id="details" class="hidden">
 
 					<div id="backdrop">
 						<img data-bind="_backdrop" src="">
@@ -51,6 +57,14 @@
 						</table>
 					</div>
 
+				</div>
+			</section>
+
+			<section id="textPage" class="hidden">
+				<div id="lightbox">
+					<button id="close"></button>
+					<h1 data-bind="_title"></h1>
+					<p data-bind="_content"></p>
 				</div>
 			</section>
 

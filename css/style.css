@@ -61,8 +61,9 @@ header {
 	position: absolute;
 	top: 0;
 	width: 100%;
-	z-index: 1000;
+	z-index: 1200;
 }
+
 header #logo {
 	background: url("img/logo.svg") no-repeat 0 center;
 	width: 280px;
@@ -70,39 +71,56 @@ header #logo {
 	margin: 15px 20px;
 	display: block;
 }
-{
-	max-height: calc(100vh - 60px);
-	display: block;
-
+header nav {
 	position: absolute;
-	top: 60px;
-	width: 100%;
+	right: 0;
+	top: 0;
 }
-ul {
+
+header nav ul {
 	list-style: none;
 }
-ul li a {
+header nav ul li {
+	float: left;
+}
+header nav ul li a {
+	color: #AAA;
+	text-decoration: none;
+	padding: 19px 10px;
+	display: block;
+	border-bottom: 0px solid #009EFF;
+	transition: 0.25s;
+}
+header nav ul li a:hover {
+	color: #AAA;
+	text-decoration: none;
+	padding: 19px 10px 16px;
+	display: block;
+	border-bottom: 3px solid #009EFF;
+	background: rgba(255,255,255,0.05);
+}
+#wrapper {
+	background: #121314;
+	min-height: 100vh;
+	margin: 0;
+	padding: 0;
+}
+#movielist ul li a {
 	color: white;
 	text-decoration: none;
 	line-height: 140%;
 	padding: 6px 18px;
 	display: block;
-	transition: 0.15s;
+	transition: 0.25s;
 	border-left: 0px solid #009EFF;
 	color: #aaa;
 }
-ul li a:hover,
-ul li.active a {
+#movielist ul li a:hover,
+#movielist ul li.active a {
 	border-left: 3px solid #009EFF;
 	padding-left: 15px;
 	color: #fff;
 	background: rgba(255,255,255,0.05);
-}
-#wrapper {
-	background: gray;
-	min-height: 100vh;
-	margin: 0;
-	padding: 0;
 }
 .hidden {
 	display: none;
@@ -120,21 +138,22 @@ div#genres {
 	background: #222326;
 	width: 200px;
 	left: 0;
+	z-index: 1000;
 }
 div#movies {
-	background: #121314;
 	width: 400px;
 	left: 200px;
+	z-index: 800;
 }
 
 div#details {
 	height: calc(100vh - 60px);
-	background: #121314;
 	width: calc(100vw - 600px);
 	right: 0px;
 	top: 61px;
 	position: absolute;
 	box-shadow: 20px;
+	z-index: 600;
 }
 
 div#details #backdrop {
@@ -261,4 +280,48 @@ div#details div#content table#specifics tr td ul {
 div#details div#content table#specifics tr td:first-child {
 	text-align: right;
 	color: #777;
+}
+
+#textPage {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	background: rgba(0,0,0,0.5);
+	z-index: 2000;
+	overflow: auto;
+}
+
+#textPage #lightbox {
+	background: white;
+	width: 980px;
+	margin: 10vh auto;
+	border-radius: 5px;
+	box-shadow: -5px 3px 5px rgba(0,0,0,0.7);
+	padding: 20px;
+	position: relative;
+}
+
+#textPage #lightbox #close {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	height: 16px;
+	width: 16px;
+	border-radius: 16px;
+	border: none;
+	background: #880000;
+	outline:none;
+}
+#textPage #lightbox #close:after {
+	display: block;
+	content: "x";
+	position: absolute;
+	font-family: arial;
+	font-weight: 700;
+	color: #FFF;
+	top: 0px;
+	left: 4px;
+	font-size: 13px;
 }
