@@ -34,6 +34,7 @@ MOVIEWEB = MOVIEWEB || {};
 					console.log("page: Movies");
 					MOVIEWEB.loadSection.genres();
 					MOVIEWEB.loadSection.movies(genreID);
+					MOVIEWEB.infiniteMovies.init();
 				},
 				'/movies/:genreID/:movieID': function (genreID, movieID) {
 					console.log("page: Details");
@@ -71,10 +72,18 @@ MOVIEWEB = MOVIEWEB || {};
 				document.getElementById('genres').className = "animated fadeInLeft";
 			}
 		},
-		movies: function(genreID){
-			if(MOVIEWEB.router.currentGenre !== genreID || document.querySelector("#movies ul").innerHTML === "") {
+		movies: function(genreID, append){
+
+			console.log("MOVIEWEB.loadSection.movies wordt uitgevoerd.");
+			
+			if(append === undefined) {
+				append = false;
+				MOVIEWEB.router.currentPage = 0;
+			}
+			if(MOVIEWEB.router.currentGenre !== genreID || document.querySelector("#movies ul").innerHTML === "" || append === true) {
 				console.log("Movies are being loaded...");
-				MOVIEWEB.getJson.movies(genreID);
+				MOVIEWEB.router.currentPage++;
+				MOVIEWEB.getJson.movies(genreID, MOVIEWEB.router.currentPage, append);
 				MOVIEWEB.router.currentGenre = genreID;
 				document.getElementById('movies').className = "animated fadeInLeft";
 			}
@@ -115,19 +124,21 @@ MOVIEWEB = MOVIEWEB || {};
 			);
 
 		},
-		movies: function (id) {
+		movies: function (id, pageID, append) {
+			console.log("MOVIEWEB.getJson.movies wordt uitgevoerd. Pagina " + pageID + " wordt geladen.");
 			//Grab the list of genres
 			MOVIEWEB.json.init(
 				/* URL */
 				"genre/"+id+"/movies",
 
 				/* Extra parameters */
-				"",
+				"&page="+pageID,
 
 				/* Succes function */
 				function(data) {
 					MOVIEWEB.convertAndSave.movies(data);
-					MOVIEWEB.renderHtml.movies(data);
+					MOVIEWEB.renderHtml.movies(append);
+					MOVIEWEB.router.loading = false;
 				},
 
 				/* Error function*/
@@ -135,22 +146,6 @@ MOVIEWEB = MOVIEWEB || {};
 					console.error(xhr);
 				}
 			);
-			
-			/*    BEGINSEL INFINITE SCROLLING
-			console.log("er passen: " + Math.ceil(  (window.innerHeight-60) / 34));
-
-
-			var elem = document.getElementById("movies");
-			if(elem.length > 19) {
-				console.log("offsetHeight: "+elem.offsetHeight+"  | scrollHeight: "+elem.scrollHeight);
-				
-				while(elem.offsetHeight < elem.scrollHeight) {
-					console.log("meer content laden!");
-					
-					
-				}
-			}
-		*/	
 		},
 		details: function (id) {
 			//Grab the list of genres
@@ -217,24 +212,31 @@ MOVIEWEB = MOVIEWEB || {};
 				}
 			);
 		},
-		movies: function () {
+		movies: function (append) {
+			console.log("MOVIEWEB.renderHTML.movies wordt uitgevoerd.");
+			
+			if(append) {
+				document.getElementById('movieUL').innerHTML = document.getElementById('movieUL').innerHTML + MOVIEWEB.dataBase.html._movies;
+			} else {
+				document.getElementById('movieUL').innerHTML = MOVIEWEB.dataBase.html._movies;
+			}
 
-			Transparency.render(
-				/*Element*/
-				document.getElementById('movies'),
+			// Transparency.render(
+			// 	/*Element*/
+			// 	document.getElementById('movies'),
 
-				/*Data*/
-				MOVIEWEB.dataBase.html,
+			// 	/*Data*/
+			// 	MOVIEWEB.dataBase.html,
 
-				/*Directives*/
-				{
-					_movies: {
-						html: function () {
-							return this._movies;
-						}
-					}
-				}
-			);
+			// 	/*Directives*/
+			// 	{
+			// 		_movies: {
+			// 			html: function () {
+			// 				return this._movies;
+			// 			}
+			// 		}
+			// 	}
+			// );
 		},
 		details: function () {
 
@@ -325,6 +327,65 @@ MOVIEWEB = MOVIEWEB || {};
 
 		}
 	};
+
+
+
+
+
+
+
+
+
+
+	MOVIEWEB.infiniteMovies = {
+		init: function() {
+			console.log("MOVIEWEB.infiniteMovies.init wordt uitgevoerd;");
+
+			var elem = document.getElementById("movieUL");
+			var container = document.getElementById("movies");
+
+			var timer = setInterval(function () {
+				if(elem.offsetHeight < container.clientHeight) {
+					if(MOVIEWEB.router.loading === false) {
+						MOVIEWEB.loadSection.movies(MOVIEWEB.router.currentGenre, true);
+						MOVIEWEB.router.loading = true;
+					}
+				} else {
+					clearInterval(timer);
+				}
+			}, 50);
+
+
+			
+				
+
+			container.addEventListener("scroll", function () {
+	  			if ((container.scrollTop+container.clientHeight) > (container.scrollHeight-500)) {
+	  				console.log("je bent beneden!");
+
+					if(MOVIEWEB.router.loading === false) {
+						MOVIEWEB.loadSection.movies(MOVIEWEB.router.currentGenre, true);
+						MOVIEWEB.router.loading = true;
+					}
+
+				}
+			});
+		}
+	};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 	MOVIEWEB._templates = {
